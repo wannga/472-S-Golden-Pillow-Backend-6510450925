@@ -1,0 +1,57 @@
+@startuml ComponentDiagram
+
+skinparam componentStyle rectangle
+
+package "Frontend Components (React)" {
+    [HomePage] 
+    [Login] 
+    [CartPage] 
+    [Register]
+    [AdminProfilePage]
+    [ClientProfilePage]
+    [OwnerProfilePage]
+    [PaymentPage]
+    [YourOrderPage]
+}
+
+package "Backend Components (Node.js + Express)" {
+    [app.js] --> [Express] : "Routing"
+    
+    package "Controllers" {
+        [UserController] --> [Sequelize] : "ORM for User"
+        [CartController] --> [Sequelize] : "ORM for Cart"
+        [OrderController] --> [Sequelize] : "ORM for Orders"
+        [ProductController] --> [Sequelize] : "ORM for Products"
+        [UploadController] --> [Multer] : "File Uploads"
+    }
+
+    package "Models (Class)" {
+        [User]
+        [Product]
+        [Cart]
+        [CartItem]
+        [Order]
+        [OrderLine]
+        [Receipt]
+    }
+
+    [Routes] --> [Controllers]
+    [Controllers] --> [Models]
+    [Routes] --> [Routes.js]
+}
+
+[Frontend Components (React)] --> [app.js] : "HTTP Requests (Axios/Fetch)"
+[app.js] --> [JWT] : "Authenticate Users"
+[UserController] --> [User] : "CRUD Operations"
+[CartController] --> [Cart] : "Manage Cart"
+[OrderController] --> [Order] : "Place Order"
+[ProductController] --> [Product] : "Manage Products"
+
+cloud "Libraries/APIs" {
+    [Express]
+    [Sequelize]
+    [Multer]
+    
+}
+
+@enduml

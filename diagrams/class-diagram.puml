@@ -1,0 +1,101 @@
+@startuml ClassDiagram
+!define ENTITY(x) class x
+!define CONTROLLER(x) class x <<Controller>>
+!define MODEL(x) class x <<Model>>
+
+ENTITY(Database)
+
+package "controllers" {
+    CONTROLLER(CartController)
+    CONTROLLER(OrderController)
+    CONTROLLER(ProductController)
+    CONTROLLER(UploadController)
+    CONTROLLER(UserController)
+}
+
+package "models" {
+    MODEL(Cart) {
+        + cart_id : Integer
+        + user_id : Integer
+    }
+    MODEL(CartItem) {
+        + product_in_cart_id : Integer
+        + amount : Integer
+        + cart_id : Integer
+        + lot_id : Char(10)
+        + grade : Char(1)
+    }
+    MODEL(Order) {
+        + order_id : Integer
+        + user_id : Integer
+        + total_price : Float
+        + payment_status : String
+        + delivery_status : String
+        + status_for_ledger : String
+        + packed_status : String
+        + slip_payment : String
+        + order_date : Date
+    }
+    MODEL(OrderLine) {
+        + order_line_id : Integer
+        + order_id : Integer
+        + lot_id : String
+        + grade : String
+        + amount : Integer
+    }
+    MODEL(Product) {
+        + lot_id : Char(10)
+        + grade : Char(1)
+        + RemainLotamount : Integer
+        + LotamountStock : Integer
+        + status : String
+        + base_price : Integer
+        + sale_price : Integer
+        + image_path : String
+        + exp_date : Date
+    }
+    MODEL(Receipt) {
+        + orderId : Integer
+        + receiptDate : Date
+    }
+    MODEL(User) {
+        + user_id : Integer
+        + username : String
+        + name : String
+        + lastname : String
+        + phone_number : String
+        + role : String
+        + password : String
+        + email : String
+        + address : String
+        + house_details : String
+        + name_road : String
+        + district : String
+        + province : String
+        + postal_code : String
+    }
+}
+
+' Relationships between controllers and models
+Database --> CartController
+Database --> OrderController
+Database --> ProductController
+Database --> UploadController
+Database --> UserController
+
+CartController --> Cart
+OrderController --> Order
+OrderController --> OrderLine
+ProductController --> Product
+UserController --> User
+UserController --> CartItem
+
+' Relationships between models
+User "1" --> "0..*" Cart : owns
+Cart "1" --> "0..*" CartItem : contains
+Order "1" --> "0..*" OrderLine : includes
+OrderLine --> Product : references
+CartItem --> Product : includes
+Order --> Receipt : generates
+
+@enduml
