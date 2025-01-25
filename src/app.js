@@ -14,26 +14,26 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const Receipt = require('../models/receipt');
+// const Receipt = require('../models/receipt');
 app.use(express.static(path.join(__dirname, '../public')));
-app.get('/receipt/:orderId', async (req, res) => {
-  try {
-    const orderId = parseInt(req.params.orderId, 10);
-    console.log('Fetching receipt for order ID:', orderId); // Debugging line
+// app.get('/receipt/:orderId', async (req, res) => {
+//   try {
+//     const orderId = parseInt(req.params.orderId, 10);
+//     console.log('Fetching receipt for order ID:', orderId); // Debugging line
 
-    const receipt = await Receipt.findOne({ where: { order_id: orderId } });
-    if (!receipt) {
-      console.warn(`Receipt not found for order ID: ${orderId}`); // Debugging line
-      return res.status(404).send({ error: 'Receipt not found' });
-    }
-    console.log('Receipt found:', receipt); // Debugging line
+//     const receipt = await Receipt.findOne({ where: { order_id: orderId } });
+//     if (!receipt) {
+//       console.warn(`Receipt not found for order ID: ${orderId}`); // Debugging line
+//       return res.status(404).send({ error: 'Receipt not found' });
+//     }
+//     console.log('Receipt found:', receipt); // Debugging line
 
-    res.status(200).send({ receiptPath: receipt.Receipt_path });
-  } catch (error) {
-    console.error('Error fetching receipt:', error);
-    res.status(500).send({ error: 'Failed to fetch receipt' });
-  }
-});
+//     res.status(200).send({ receiptPath: receipt.Receipt_path });
+//   } catch (error) {
+//     console.error('Error fetching receipt:', error);
+//     res.status(500).send({ error: 'Failed to fetch receipt' });
+//   }
+// });
 
 
 const sequelize = require('./config/database');
