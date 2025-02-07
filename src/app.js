@@ -120,6 +120,7 @@ app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
 app.get('/income-summary', productController.getIncomeSummary);
 app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
 app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);
+app.post('/register-admin-staff', userController.addAdminAndStaff);
 
 const server = http.createServer(app);
 

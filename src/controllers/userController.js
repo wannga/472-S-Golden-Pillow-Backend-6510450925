@@ -130,3 +130,41 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 };
+
+// Controller function for add new user with role "admin","packaging staff","delivering"
+exports.addAdminAndStaff = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const {
+    username, name, lastname, phone_number, password,
+    email, address, house_details, name_road, district, province, postal_code,role
+  } = req.body;
+
+  try {
+    // Create new user
+    const newUser = await User.create({
+      username,
+      name,
+      lastname,
+      phone_number,
+      role: role,
+      password,
+      email,
+      address,
+      house_details,
+      name_road,
+      district,
+      province,
+      postal_code,
+    });
+
+
+    res.status(201).json({ message: 'User registered successfully!' });
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ error: 'An error occurred while creating user' });
+  }
+};
