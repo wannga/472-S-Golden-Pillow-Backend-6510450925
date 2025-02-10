@@ -122,6 +122,7 @@ app.post('/delivered-orders',deliveredOrderController.addDelivery);
 app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
 app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);
 app.post('/register-admin-staff', userController.addAdminAndStaff);
+app.delete('/delete-user/:staffId', userController.deleteUserById);
 
 const server = http.createServer(app);
 
