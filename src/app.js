@@ -118,6 +118,7 @@ app.post('/orders/updatePackedStatus', orderController.updatePackedStatus);
 app.post('/orders/createreceipt', orderController.createreceipt);
 app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
 app.get('/income-summary', productController.getIncomeSummary);
+app.post('/delivered-orders',deliveredOrderController.addDelivery);
 app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
 app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);
 app.post('/register-admin-staff', userController.addAdminAndStaff);

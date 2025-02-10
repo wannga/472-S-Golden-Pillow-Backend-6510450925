@@ -3,6 +3,22 @@ const sequelize = require("../config/database");
 const User = require("../models/User");
 const DeliveredOrder = require("../models/DeliveredOrder");
 
+// add delivery code to delivered order
+exports.addDelivery = async (req, res) => {
+  try {
+    const { ems_code,order_id,staff_id } = req.body;
+    const delivered_order = await DeliveredOrder.create({
+      ems_code,
+      order_id,
+      staff_id
+    });
+    res.status(201).json(delivered_order);
+  } catch (error) {
+    console.error('Error adding delivered order code:', error);
+    res.status(400).json({ error: error.message || 'An unknown error occurred' });
+  }
+};
+
 exports.getAllDeliveredOrders =  async (req, res) => {
   try {
     const deliveredOrders = await DeliveredOrder.findAll();
