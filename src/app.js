@@ -47,7 +47,8 @@ require('events').EventEmitter.defaultMaxListeners = 15;
 const orderController = require('./controllers/orderController');
 const productController = require('./controllers/productController');
 const userController = require('./controllers/userController');
-const cartController = require('./controllers/cartController'); 
+const cartController = require('./controllers/cartController');
+const deliveredOrderController = require('./controllers/deliveredOrderController');
 
 
 const Order = require('./models/Order');
@@ -117,6 +118,11 @@ app.post('/orders/updatePackedStatus', orderController.updatePackedStatus);
 app.post('/orders/createreceipt', orderController.createreceipt);
 app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
 app.get('/income-summary', productController.getIncomeSummary);
+app.post('/delivered-orders',deliveredOrderController.addDelivery);
+app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
+app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);
+app.post('/register-admin-staff', userController.addAdminAndStaff);
+app.delete('/delete-user/:staffId', userController.deleteUserById);
 
 const server = http.createServer(app);
 
