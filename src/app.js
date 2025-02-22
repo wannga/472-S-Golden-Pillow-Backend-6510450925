@@ -49,6 +49,7 @@ const productController = require('./controllers/productController');
 const userController = require('./controllers/userController');
 const cartController = require('./controllers/cartController');
 const deliveredOrderController = require('./controllers/deliveredOrderController');
+const reviewController = require('./controllers/reviewController')
 
 
 const Order = require('./models/Order');
@@ -123,6 +124,11 @@ app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
 app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);
 app.post('/register-admin-staff', userController.addAdminAndStaff);
 app.delete('/delete-user/:staffId', userController.deleteUserById);
+
+app.post('/reviews/create', reviewController.createReview);
+app.put('/reviews/feedback/:review_id', reviewController.updateReviewFeedback);
+app.get('/reviews/:review_id', reviewController.getReviewsByID);
+app.get('/reviews', reviewController.getReviewsAll);
 
 const server = http.createServer(app);
 
