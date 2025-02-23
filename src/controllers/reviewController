@@ -4,8 +4,8 @@ const reviewController = {
     // สร้างรีวิวใหม่
     async createReview(req, res) {
         try {
-            const { star, comment, order_id, lot_id, grade, username } = req.body;
-
+            let { star, comment, order_id, lot_id, grade, username } = req.body;
+            order_id = parseInt(order_id, 10);
             // ตรวจสอบข้อมูลที่จำเป็น
             if (!star || !comment || !order_id || !lot_id || !grade || !username) {
                 return res.status(400).json({ message: 'Missing required fields' });
