@@ -49,6 +49,8 @@ const productController = require('./controllers/productController');
 const userController = require('./controllers/userController');
 const cartController = require('./controllers/cartController'); 
 const couponController = require('./controllers/couponController');
+const deliveredOrderController = require('./controllers/deliveredOrderController');
+const reviewController = require('./controllers/reviewController')
 
 
 const Order = require('./models/Order');
@@ -120,6 +122,16 @@ app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
 app.get('/income-summary', productController.getIncomeSummary);
 app.get('/coupon', couponController.getAllCoupons);
 app.post('/coupon/createCoupon', couponController.addCoupon);
+app.post('/delivered-orders',deliveredOrderController.addDelivery);
+app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
+app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);
+app.post('/register-admin-staff', userController.addAdminAndStaff);
+app.delete('/delete-user/:staffId', userController.deleteUserById);
+
+app.post('/reviews/create', reviewController.createReview);
+app.put('/reviews/feedback/:review_id', reviewController.updateReviewFeedback);
+app.get('/reviews/:review_id', reviewController.getReviewsByID);
+app.get('/reviews', reviewController.getReviewsAll);
 
 const server = http.createServer(app);
 

@@ -1,4 +1,16 @@
 # ProjectSA-golden-pillow-backend
-- https://www.figma.com/board/AorlmaIn8sD8H0Zcv1MMjR/SA-butterhoney?node-id=0-1&node-type=canvas&t=z1tDj3X9sppUgCNU-0
-- https://www.figma.com/design/8L3Aviq8XIPxI9TOMTLdlH/UISA?t=awEScPMhx47lKVxv-0
-- https://drive.google.com/file/d/1gvKWiZg0ipB2vxDhwXSUFp4rnvvl5O52/view?usp=sharing
+    - ชื่อเว็บไซต์: Golden Pillow
+    - วัตถุประสงค์:  เพื่อพัฒนาระบบในการจัดการบันทึกรายได้และจำหน่ายทุเรียนอย่างเป็นระบบและมีประสิทธิภาพมากขึ้น 
+รวมถึงอำนวยความสะดวกในการสั่งซื้อทุเรียนให้ทั้งกับผู้ซื้อและผู้ขาย 
+   
+    - ชื่อสมาชิก:
+    นางสาวอโณทัย บุณยเสนา 6510451042 หมู่ 202 ปี3
+    นางสาวอาณัฏฐชา กรรภิรมย์ 6510451123 หมู่ 200 ปี3
+    นางสาววรรณวลัย งามศรัทธา 6510450925 หมู่ 202 ปี3
+    นางสาวจันทร์ทิพ พิริยบรรเจิด 6510405369 หมู่ 1 ปี3
+
+
+    - ฟีเจอร์ที่รับผิดชอบของสมาชิกแต่ละคน
+    @ammbopp Feat: Review Product
+    @wannga Feat: Promotion Coupon
+    @chantip-pi Feat: User Role Management by Owner
