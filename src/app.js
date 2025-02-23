@@ -122,6 +122,7 @@ app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
 app.get('/income-summary', productController.getIncomeSummary);
 app.get('/coupon', couponController.getAllCoupons);
 app.post('/coupon/createCoupon', couponController.addCoupon);
+app.get('/coupon/check-coupon/:coupon_code', couponController.checkCouponCode);
 app.post('/delivered-orders',deliveredOrderController.addDelivery);
 app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
 app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);

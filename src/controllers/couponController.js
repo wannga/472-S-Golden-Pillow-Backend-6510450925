@@ -91,3 +91,20 @@ exports.addCoupon = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while creating the coupon', error: error.message });
     }  
 };
+
+exports.checkCouponCode = async (req, res) => {
+    const { coupon_code } = req.params;
+  
+    try {
+      const existingCoupon = await Coupon.findOne({ where: { coupon_code } });
+  
+      if (existingCoupon) {
+        return res.status(409).json({ message: 'Coupon code is already exist' });
+      }
+  
+      res.status(200).json({ message: 'Code is available' });
+    } catch (error) {
+      console.error('Error checking coupon code:', error);
+      res.status(500).json({ error: 'An error occurred while checking the coupon code' });
+    }
+  };
