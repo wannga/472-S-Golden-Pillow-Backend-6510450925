@@ -48,6 +48,7 @@ const orderController = require('./controllers/orderController');
 const productController = require('./controllers/productController');
 const userController = require('./controllers/userController');
 const cartController = require('./controllers/cartController'); 
+const couponController = require('./controllers/couponController');
 
 
 const Order = require('./models/Order');
@@ -117,6 +118,8 @@ app.post('/orders/updatePackedStatus', orderController.updatePackedStatus);
 app.post('/orders/createreceipt', orderController.createreceipt);
 app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
 app.get('/income-summary', productController.getIncomeSummary);
+app.get('/coupon', couponController.getAllCoupons);
+app.post('/coupon/createCoupon', couponController.addCoupon);
 
 const server = http.createServer(app);
 

@@ -3,11 +3,11 @@ const sequelize = require('../config/database');
 
 const Coupon = sequelize.define('Coupon', {
     discount_details: {
-        type: DataTypes.VARCHAR,
+        type: DataTypes.CHAR(20),
         allowNull: false,
     },
     coupon_code: {
-        type: DataTypes.VARCHAR,
+        type: DataTypes.CHAR(13),
         allowNull: false,
         unique: true
     },
@@ -16,8 +16,9 @@ const Coupon = sequelize.define('Coupon', {
         defaultValue: 'AVAILABLE'
     },
     coupon_condition: {
-        type: DataTypes.VARCHAR,
-    }
+        type: DataTypes.CHAR(255),
+        allowNull: true,
+    }    
 });
 
 module.exports = Coupon;
