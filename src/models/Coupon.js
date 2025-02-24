@@ -22,7 +22,7 @@ const Coupon = sequelize.define('Coupon', {
     },
     coupon_condition: {
         type: DataTypes.CHAR(255),
-        allowNull: true,
+        allowNull: false,
     }  },
 {
 tableName: 'Coupon',

@@ -78,6 +78,17 @@ exports.addCoupon = async (req, res) => {
     const { discount_details, coupon_code, coupon_condition, coupon_status = "AVAILABLE" } = req.body;
 
     try {
+        const existingCoupon = await Coupon.findOne({ where: { coupon_code } });
+
+        if (existingCoupon) {
+            return res.status(409).json({ message: 'Coupon code already exists' });
+        }
+
+        // Validate required fields
+        if (!coupon_condition || coupon_condition.trim() === '') {
+            return res.status(400).json({ message: 'Coupon condition field is not inputted.' });
+        }
+
         const newCoupon = await Coupon.create({
             discount_details,
             coupon_code,
@@ -107,4 +118,4 @@ exports.checkCouponCode = async (req, res) => {
       console.error('Error checking coupon code:', error);
       res.status(500).json({ error: 'An error occurred while checking the coupon code' });
     }
-  };
+};

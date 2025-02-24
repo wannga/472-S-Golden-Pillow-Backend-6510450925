@@ -11,6 +11,23 @@ Feature: Create Coupons
     And I click the confirm button
     Then I should see a success message "Coupon created successfully!"
 
+  Scenario: Save creating coupon
+    Given I am an admin
+    When I enter the discount value, coupon code, coupon condition 
+    And I click the "Save" button
+    Then The coupon should be successfully added to the system.
+
+  Scenario: Save when coupon code already exists
+    Given I am an admin 
+    When I enter the coupon code that existed 
+    And I click the “Save” Button 
+    Then I should receive an error message saying "Coupon code already exists"
+
+  Scenario: Check condition
+    Given I am an admin When I enter discount value, coupon code 
+    And I click the “Save” Button
+    Then I should receive an error message saying "coupon condition field is not inputted.
+
   Scenario: Coupon code is available
     Given a coupon code "NEWCODE"
     When I check the availability of the coupon code
