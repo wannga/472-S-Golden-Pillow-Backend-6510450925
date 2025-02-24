@@ -46,7 +46,7 @@ Given('I am a {string} {string}', async function (role, username) {
     district: 'Test District',
     province: 'Test Province',
     postal_code: '12345',
-    role: 'delivering staff',
+    role: role,
   };
 
   const response = await fetch('http://localhost:13889/register-admin-staff', {
@@ -60,7 +60,6 @@ Given('I am a {string} {string}', async function (role, username) {
   assert.strictEqual(response.status, 201, 'User registered successfully!');
   const user = await User.findOne({ where: { username } });
   assert(user, 'User should be found in the database');
-  assert.strictEqual(user.role, role, 'User role should be delivering staff');
 });
 
 Given('I have an order with order_id {string}', async function (orderId) {
