@@ -4,7 +4,7 @@ const User = require('../../src/models/User');
 const DeliveredOrder = require('../../src/models/DeliveredOrder');
 const axios = require('axios');
 
-When('I add a new packaging staff with username {string}', async function (username) {
+When('I add a new delivering staff with username {string}', async function (username) {
   const userData = {
     username,
     name: 'Test',
@@ -18,7 +18,7 @@ When('I add a new packaging staff with username {string}', async function (usern
     district: 'Test District',
     province: 'Test Province',
     postal_code: '12345',
-    role: 'packaging staff',
+    role: 'delivering staff',
   };
 
   const response = await fetch('http://localhost:13889/register-admin-staff', {
@@ -46,7 +46,7 @@ Given('I am a {string} {string}', async function (role, username) {
     district: 'Test District',
     province: 'Test Province',
     postal_code: '12345',
-    role: 'packaging staff',
+    role: 'delivering staff',
   };
 
   const response = await fetch('http://localhost:13889/register-admin-staff', {
@@ -60,7 +60,7 @@ Given('I am a {string} {string}', async function (role, username) {
   assert.strictEqual(response.status, 201, 'User registered successfully!');
   const user = await User.findOne({ where: { username } });
   assert(user, 'User should be found in the database');
-  assert.strictEqual(user.role, role, 'User role should be packaging staff');
+  assert.strictEqual(user.role, role, 'User role should be delivering staff');
 });
 
 Given('I have an order with order_id {string}', async function (orderId) {
@@ -68,7 +68,7 @@ Given('I have an order with order_id {string}', async function (orderId) {
   assert.strictEqual(this.order.status, 200, 'Order should be available');
 });
 
-When('packaging staff {string} add a ems code {string} to order with order_id {string}', async function (username, ems_code, order_id) {
+When('delivering staff {string} add a ems code {string} to order with order_id {string}', async function (username, ems_code, order_id) {
   const user = await User.findOne({ where: { username } });
   const staff_id = parseInt(user.user_id, 10);
 
@@ -105,7 +105,7 @@ After(async function () {
     },
   });
 
-  const userToDelete = await User.findOne({ where: { username: 'package_user1' } });
+  const userToDelete = await User.findOne({ where: { username: 'deliver_user1' } });
 
   if (orderToDelete) {
     const response = await axios.delete(`http://localhost:13889/delivered-order/${orderToDelete.deliver_id}`);
