@@ -49,3 +49,19 @@ exports.getDeliveredOrderDetails = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch delivered order details" });
   }
 };
+
+exports.deleteDeliveredOrderById = async (req, res) => {
+  const { deliver_id } = req.params;
+
+  try {
+    const delivery = await DeliveredOrder.findByPk(deliver_id);
+    if (!delivery) {
+      return res.status(404).json({ message: 'Deliver order not found' });
+    }
+     await delivery.destroy();
+     return res.status(200).json({ message: 'Deliver order deleted successfully' });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
