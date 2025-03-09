@@ -1,4 +1,6 @@
 const Review = require('../models/Review');
+const Order = require('../models/Order');
+
 
 const reviewController = {
     // สร้างรีวิวใหม่
@@ -9,6 +11,20 @@ const reviewController = {
             // ตรวจสอบข้อมูลที่จำเป็น
             if (!star || !comment || !order_id || !lot_id || !grade || !username) {
                 return res.status(400).json({ message: 'Missing required fields' });
+            }
+
+            // Check if the order is delivered
+            const order = await Order.findByPk(order_id);
+            if (!order || order.delivery_status !== "sent the packet") {
+                return res.status(403).json({ message: "You can only review delivered orders." });
+            }
+            // Check if user already reviewed
+            const existingReview = await Review.findOne({
+                where: { username, order_id, lot_id, grade }
+            });
+
+            if (existingReview) {
+                return res.status(400).json({ message: "You have already reviewed this product." });
             }
 
             // สร้างรีวิวใหม่
@@ -81,7 +97,36 @@ const reviewController = {
             console.error(error);
             return res.status(500).json({ message: 'Server error' });
         }
+    },
+    // edit comment and update to db ja
+    async updateReview(req, res) {
+        try {
+            const reviewId = req.params.review_id;
+            const { username, comment, star } = req.body;
+    
+            // find review
+            const review = await Review.findByPk(reviewId);
+            if (!review) {
+                return res.status(404).json({ message: 'Review not found' });
+            }
+    
+            // Ensure the user updating the review is the original author
+            if (review.username !== username) {
+                return res.status(403).json({ message: 'Unauthorized to edit this review' });
+            }
+    
+            // Update only if new values are provided
+            if (comment) review.comment = comment;
+            if (star) review.star = star;
+    
+            await review.save(); // Save changes
+            return res.status(200).json({ message: 'Review updated successfully', review });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Server error' });
+        }
     }
+    
 };
 
 module.exports = reviewController;

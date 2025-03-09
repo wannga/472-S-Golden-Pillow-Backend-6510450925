@@ -128,10 +128,13 @@ app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
 app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);
 app.post('/register-admin-staff', userController.addAdminAndStaff);
 app.delete('/delete-user/:staffId', userController.deleteUserById);
+
 app.post('/reviews/create', reviewController.createReview);
 app.put('/reviews/feedback/:review_id', reviewController.updateReviewFeedback);
 app.get('/reviews/:review_id', reviewController.getReviewsByID);
 app.get('/reviews', reviewController.getReviewsAll);
+app.put('/reviews/edit/:review_id', reviewController.updateReview);
+
 app.delete('/delivered-order/:deliver_id', deliveredOrderController.deleteDeliveredOrderById);
 const server = http.createServer(app);
 
