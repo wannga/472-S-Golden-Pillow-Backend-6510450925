@@ -32,7 +32,7 @@ exports.getCouponByCode = async (req, res) => {
 };
 
 exports.getAvailableCoupons = async (req, res) => {
-    const { coupon_status } = req.params;
+    const coupon_status = "AVAILABLE";
     console.log("Received coupon_status:", coupon_status);
 
     try {
