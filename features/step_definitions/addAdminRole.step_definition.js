@@ -1,4 +1,4 @@
-const { Given, When, Then } = require('@cucumber/cucumber');
+const { Given, When, Then, After } = require('@cucumber/cucumber');
 const assert = require('assert');
 const User = require('../../src/models/User')
 const axios = require('axios');
@@ -95,3 +95,20 @@ When('I add an already existed admin with username {string}', async function (us
 Then('I should fail.', function () {
   assert.notStrictEqual(this.response.status, 400, 'User should not be created again');
 });
+
+After(async function () {
+  // Delete admin_1 user
+  const userToDelete1 = await User.findOne({ where: { username: 'admin_user1' } });
+  if (userToDelete1) {
+    const response1 = await axios.delete(`http://localhost:13889/delete-user/${userToDelete1.user_id}`);
+    assert.strictEqual(response1.status, 200, 'User admin_1 deleted successfully');
+  }
+
+  // Delete admin_2 user
+  const userToDelete2 = await User.findOne({ where: { username: 'admin_user3' } });
+  if (userToDelete2) {
+    const response2 = await axios.delete(`http://localhost:13889/delete-user/${userToDelete2.user_id}`);
+    assert.strictEqual(response2.status, 200, 'User admin_2 deleted successfully');
+  }
+});
+
