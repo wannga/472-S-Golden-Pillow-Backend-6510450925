@@ -31,6 +31,24 @@ exports.getCouponByCode = async (req, res) => {
     }
 };
 
+exports.getCouponById = async (req, res) => {
+    const { coupon_id } = req.params;
+    console.log("Received coupon_id:", coupon_id); 
+
+    try {
+        const coupon = await Coupon.findOne({ where: { coupon_id } });
+
+        if (!coupon) {
+            return res.status(404).json({ message: "Coupon not found" }); // Fixed typo
+        }
+
+        res.status(200).json(coupon);
+    } catch (error) {
+        console.error('Error fetching coupon:', error);
+        res.status(500).json({ message: 'Failed to fetch coupon' });
+    }
+};
+
 exports.getAvailableCoupons = async (req, res) => {
     const coupon_status = "AVAILABLE";
     console.log("Received coupon_status:", coupon_status);
@@ -47,11 +65,11 @@ exports.getAvailableCoupons = async (req, res) => {
 //disable function section
 
 exports.disableCoupon = async (req, res) => {
-    const { coupon_code } = req.params;
-    console.log("Received coupon_code:", coupon_code);
+    const { coupon_id } = req.params;
+    console.log("Received coupon_id:", coupon_id);
 
     try {
-        const coupon = await Coupon.findOne({ where: { coupon_code } });
+        const coupon = await Coupon.findOne({ where: { coupon_id } });
 
         if (!coupon) {
             return res.status(404).json({ message: "Coupon not found" });
@@ -66,11 +84,11 @@ exports.disableCoupon = async (req, res) => {
 };
 
 exports.reActivateCoupon = async (req, res) => {
-    const { coupon_code } = req.params;
-    console.log("Received coupon_code:", coupon_code);
+    const { coupon_id } = req.params;
+    console.log("Received coupon_id:", coupon_id);
 
     try {
-        const coupon = await Coupon.findOne({ where: { coupon_code } });
+        const coupon = await Coupon.findOne({ where: { coupon_id } });
 
         if (!coupon) {
             return res.status(404).json({ message: "Coupon not found" });

@@ -14,19 +14,19 @@ Feature: Create Coupons
   Scenario: Save creating coupon
     Given I am an admin
     When I enter the discount value, coupon code, coupon condition 
-    And I click the "Save" button
+    And I click the "Confirm" button
     Then The coupon should be successfully added to the system.
   
   Scenario: Save when coupon code already exists
     Given I am an admin
     When I enter the coupon code that existed
-    And I click the "Save" button
+    And I click the "Confirm" button
     Then I should receive an error message saying "Coupon code already exists"
   
   Scenario: Check condition
     Given I am an admin
     When I enter discount value, coupon code
-    And I click the "Save" button
+    And I click the "Confirm" button
     Then I should receive an error message saying "Coupon condition field is not inputted."
   
   Scenario: Coupon code is available

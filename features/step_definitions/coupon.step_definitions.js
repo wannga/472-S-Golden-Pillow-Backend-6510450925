@@ -62,7 +62,7 @@ When('I enter {string} in the coupon condition field', function (condition) {
 
 When('I click the confirm button', async function () {
     try {
-        response = await axios.post('http://localhost:13889/coupon/create', {
+        response = await axios.post('http://localhost:13889/coupon/createCoupon', {
             coupon_code,
             discount_details,
             coupon_condition,
@@ -76,7 +76,7 @@ When('I click the confirm button', async function () {
 When('I enter the discount value, coupon code, coupon condition', function () {
     couponData = {
         coupon_code: 'TEST123',
-        discount_details: '15% off',
+        discount_details: '15% discount',
         coupon_condition: 'Minimum purchase of 300 baht',
         coupon_status: 'AVAILABLE',
     };
@@ -85,7 +85,7 @@ When('I enter the discount value, coupon code, coupon condition', function () {
 When('I enter the coupon code that existed', function () {
     couponData = {
         coupon_code: 'EXISTINGCODE', // Assuming this code already exists
-        discount_details: '20% off',
+        discount_details: '20% discount',
         coupon_condition: 'Minimum purchase of 200 baht',
         coupon_status: 'AVAILABLE',
     };
@@ -94,16 +94,16 @@ When('I enter the coupon code that existed', function () {
 When('I enter discount value, coupon code', function () {
     couponData = {
         coupon_code: 'NOCONDITION',
-        discount_details: '25% off',
+        discount_details: '25% discount',
         coupon_condition: '', // Missing condition field
         coupon_status: 'AVAILABLE',
     };
 });
 
 When('I click the {string} button', async function (button) {
-    if (button.toLowerCase() === "save") {
+    if (button.toLowerCase() === "confirm") {
         try {
-            response = await axios.post('http://localhost:13889/coupon/create', couponData);
+            response = await axios.post('http://localhost:13889/coupon/createCoupon', couponData);
         } catch (error) {
             response = error.response;
         }
@@ -112,7 +112,7 @@ When('I click the {string} button', async function (button) {
 
 When('I check the availability of the coupon code', async function () {
     try {
-        response = await axios.get(`http://localhost:13889/coupon/check-coupon/${coupon_code}`);
+        response = await axios.get(`http://localhost:13889/coupon/check-coupon/:${coupon_code}`);
     } catch (error) {
         response = error.response;
     }
@@ -125,14 +125,14 @@ When('the customer makes an order with total price = {int} Baht', function (tota
 When('the customer uses a {int}% discount coupon code and the order placed meets the coupon condition', async function (discount) {
     try {
         // First validate the coupon usage
-        await axios.post('http://localhost:13889/coupon/validate-coupon', {
+        await axios.post('http://localhost:13889/coupon/check-coupon-condition', {
             order_amount: order.original_price,
             total_products: order.total_products || 5, // Default if not provided
             coupon_code: order.coupon_code
         });
         
         // Then calculate the discount
-        response = await axios.post('http://localhost:13889/coupon/calculate-discount', {
+        response = await axios.post('http://localhost:13889/coupon/coupon-discount', {
             original_price: order.original_price,
             coupon_code: order.coupon_code
         });
@@ -143,7 +143,7 @@ When('the customer uses a {int}% discount coupon code and the order placed meets
 
 When('the order placed does not meets the coupon condition', async function () {
     try {
-        response = await axios.post('http://localhost:13889/coupon/validate-coupon', {
+        response = await axios.post('http://localhost:13889/coupon/check-coupon-condition', {
             order_amount: order.order_amount,
             total_products: order.total_products,
             coupon_code: order.coupon_code
@@ -158,14 +158,14 @@ When('customer want to add another coupon code', async function () {
     
     try {
         // First validate the new coupon
-        await axios.post('http://localhost:13889/coupon/validate-coupon', {
+        await axios.post('http://localhost:13889/coupon/check-coupon-condition', {
             order_amount: order.order_amount,
             total_products: order.total_products,
             coupon_code: order.coupon_code
         });
         
         // Then calculate discount with the new coupon
-        response = await axios.post('http://localhost:13889/coupon/calculate-discount', {
+        response = await axios.post('http://localhost:13889/coupon/coupon-discount', {
             original_price: order.order_amount,
             coupon_code: order.coupon_code
         });
