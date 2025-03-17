@@ -161,37 +161,36 @@ exports.calculateDiscountedPrice = async (req, res) => {
     const { original_price, coupon_code } = req.body;
 
     try {
-        const coupon = await Coupon.findOne({ where: { coupon_code } });
+        const coupon = await Coupon.findOne({ where: { coupon_code, coupon_status: "AVAILABLE" } });
 
         if (!coupon) {
-            return res.status(404).json({ message: "Coupon not found" });
+            return res.status(404).json({ message: "Invalid or expired coupon" });
         }
 
-        // Extract discount percentage from `discount_details` (assuming it stores percentage like "5% discount")
+        // Extract discount percentage (ensure the format is correct in DB)
         const discountMatch = coupon.discount_details.match(/(\d+)%/);
         if (!discountMatch) {
             return res.status(400).json({ message: "Invalid discount format" });
         }
 
-        const discountPercent = parseFloat(discountMatch[1]); // Convert string to number
-
-        // Calculate discounted price
+        const discountPercent = parseFloat(discountMatch[1]);
         const discountedPrice = original_price - (original_price * (discountPercent / 100));
 
         res.status(200).json({ 
             message: "Discount applied successfully",
             original_price, 
             discount: `${discountPercent}%`, 
-            discounted_price: discountedPrice.toFixed(2) 
+            discounted_price: discountedPrice.toFixed(2)
         });
+
     } catch (error) {
-        console.error('Error calculating discounted price:', error);
-        res.status(500).json({ message: 'Failed to calculate discount' });
+        console.error("Error calculating discount:", error);
+        res.status(500).json({ message: "Failed to calculate discount" });
     }
 };
 
 exports.validateCouponUsage = async (req, res) => {
-    const { order_amount, total_products, coupon_code } = req.body;
+    const { total_price, total_products, coupon_code } = req.body;
 
     try {
         const coupon = await Coupon.findOne({ where: { coupon_code } });
@@ -200,22 +199,36 @@ exports.validateCouponUsage = async (req, res) => {
             return res.status(404).json({ message: "Coupon not found" });
         }
 
-        // Extracting conditions from `coupon_condition`
-        const amountMatch = coupon.coupon_condition.match(/(\d+)\s*baht/);
-        const productMatch = coupon.coupon_condition.match(/(\d+)\s*products/);
+        // Ensure condition extraction works for different formats
+        let minPurchaseRequirement = null;
+        let minProductRequirement = null;
 
-        const minPurchaseRequirement = amountMatch ? parseFloat(amountMatch[1]) : null;
-        const minProductRequirement = productMatch ? parseInt(productMatch[1]) : null;
+        if (coupon.coupon_condition) {
+            const amountMatch = coupon.coupon_condition.match(/([\d,]+(?:\.\d+)?)\s*(?:baht|บาท|thb|THB|B|฿)/i);
+    
+            // Look for product quantities with various formats
+            const productMatch = coupon.coupon_condition.match(/(\d+)\s*(?:product|products|item|items)/i);
+
+            minPurchaseRequirement = amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : null;
+            minProductRequirement = productMatch ? parseInt(productMatch[1]) : null;
+        }
+
+        // Debugging logs
+        console.log("Coupon Condition:", coupon.coupon_condition);
+        console.log("Extracted Min Purchase Requirement:", minPurchaseRequirement);
+        console.log("Extracted Min Product Requirement:", minProductRequirement);
+        console.log("Order Amount:", total_price);
+        console.log("Total Products:", total_products);
 
         // Validate order amount
-        if (minPurchaseRequirement && order_amount < minPurchaseRequirement) {
+        if (minPurchaseRequirement !== null && total_price < minPurchaseRequirement) {
             return res.status(400).json({ 
                 message: `Order does not meet the minimum purchase requirement of ${minPurchaseRequirement} baht.` 
             });
         }
 
         // Validate product count
-        if (minProductRequirement && total_products < minProductRequirement) {
+        if (minProductRequirement !== null && total_products < minProductRequirement) {
             return res.status(400).json({ 
                 message: `Order must contain at least ${minProductRequirement} products.` 
             });
@@ -223,14 +236,13 @@ exports.validateCouponUsage = async (req, res) => {
 
         res.status(200).json({ 
             message: "Coupon can be applied",
-            order_amount,
+            total_price,
             total_products,
             conditions: coupon.coupon_condition
         });
 
     } catch (error) {
-        console.error('Error validating coupon usage:', error);
-        res.status(500).json({ message: 'Failed to validate coupon' });
+        console.error("Error validating coupon usage:", error);
+        res.status(500).json({ message: "Failed to validate coupon" });
     }
 };
-
