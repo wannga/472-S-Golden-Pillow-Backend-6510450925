@@ -1,7 +1,7 @@
 const Review = require('../models/Review');
 const Order = require('../models/Order');
 
-
+const { Op, Sequelize } = require("sequelize");
 const reviewController = {
     // สร้างรีวิวใหม่
     async createReview(req, res) {
@@ -125,7 +125,39 @@ const reviewController = {
             console.error(error);
             return res.status(500).json({ message: 'Server error' });
         }
+    },
+
+    async getAverageRating(req, res) {
+        try {
+            let { lot_id, grade } = req.query;
+            const where = {};
+    
+            if (!lot_id || !grade) {
+                return res.status(400).json({ message: "Missing lot_id or grade" });
+            }
+    
+            if (lot_id) where.lot_id = lot_id;
+            if (grade) where.grade = grade;
+    
+            const reviews = await Review.findAll({ where });           
+    
+            if (reviews.length === 0) {
+                return res.status(200).json({ average: 0, count: 0 });
+            }
+    
+            const totalStars = reviews.reduce((sum, review) => sum + Number(review.star), 0);
+            const average = totalStars / reviews.length;
+    
+            return res.status(200).json({ 
+                average: Number(average.toFixed(2)), 
+                count: reviews.length 
+            });
+        } catch (error) {
+            console.error("Error in getAverageRating:", error);
+            return res.status(500).json({ message: "Server error" });
+        }
     }
+
     
 };
 
