@@ -97,7 +97,7 @@ exports.reActivateCoupon = async (req, res) => {
         await coupon.update({ coupon_status: "AVAILABLE" }); // Updating status
         res.status(200).json({ message: "Coupon reactivate successfully!" });
     } catch (error) {
-        console.error('Error disabling coupon:', error);
+        console.error('Error reactivating coupon:', error);
         res.status(500).json({ message: 'Failed to reactivate coupon' });
     }
 };
@@ -164,7 +164,7 @@ exports.calculateDiscountedPrice = async (req, res) => {
         const coupon = await Coupon.findOne({ where: { coupon_code, coupon_status: "AVAILABLE" } });
 
         if (!coupon) {
-            return res.status(404).json({ message: "Invalid or expired coupon" });
+            return res.status(404).json({ message: "This coupon code is not available anymore, the discount will not be applied." });
         }
 
         // Extract discount percentage (ensure the format is correct in DB)
