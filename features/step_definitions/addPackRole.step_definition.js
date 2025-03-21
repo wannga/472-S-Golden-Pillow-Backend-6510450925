@@ -3,6 +3,7 @@ const assert = require('assert');
 const User = require('../../src/models/User');
 const DeliveredOrder = require('../../src/models/DeliveredOrder');
 const axios = require('axios');
+const Order = require('../../src/models/Order');
 
 When('I add a new packaging staff with username {string}', async function (username) {
   const userData = {
@@ -32,15 +33,34 @@ When('I add a new packaging staff with username {string}', async function (usern
   assert.strictEqual(response.status, 201, 'User registered successfully!');
 });
 
+When('packaging staff {string} packed all package in order_id {string}', async function (string, orderId) {
+const response =  await axios.post(`http://localhost:13889/orders/updatePackedStatus`, {
+  orderId,
+  packed_status: "packed",
+});
 
+  assert.strictEqual(response.status, 200, 'packed_status updated successfully');
+});
+
+Then('A order with order_id {string} will have packed_status {string}', async function (orderId, packed_status) {
+  const order = await Order.findOne({
+    where: { order_id: orderId },
+  });
+  assert.strictEqual(order.packed_status,packed_status, 'packed_status updated successfully');
+});
 
 After(async function () {
 
-
+  const orderId = "52";
   const userToDelete = await User.findOne({ where: { username: 'package_user1' } });
-
   if (userToDelete) {
     const response = await axios.delete(`http://localhost:13889/delete-user/${userToDelete.user_id}`);
     assert.strictEqual(response.status, 200, 'User deleted successfully');
   }
+  
+  await axios.post(`http://localhost:13889/orders/updatePackedStatus`, {
+    orderId,
+    packed_status: "packed",
+  });
+  
 });
