@@ -508,7 +508,11 @@ exports.createreceipt = async (req, res) => {
     }
 
     // Save the canvas as an image
-    const imagePath = path.join(imageDir, `receipt_${orderId}.png`);
+    let imagePath = path.join(imageDir, `receipt_${orderId}.png`);
+    imagePath = path.resolve(imagePath);
+    if (!imagePath.startsWith(imageDir)) {
+      throw new Error('Invalid path');
+    }
     const out = fs.createWriteStream(imagePath);
     const stream = canvas.createPNGStream();
     stream.pipe(out);
