@@ -8,10 +8,10 @@ let response = null;
 
 // Scenario: Customer can review a delivered product
 Given('a customer has an order in which delivery_status of that order is "sent the packet"', async function () {
-    this.order = await Order.create({
+    order_new = await Order.create({
         order_id: 1270,
         delivery_status: "sent the packet",
-        user_id: 1,
+        user_id: '1',
         total_price: 12700,
         payment_status: "Approved",
         packed_status: "packed",
@@ -22,11 +22,11 @@ Given('a customer has an order in which delivery_status of that order is "sent t
 When('customer wants to comment on a product in that order', async function () {
     try {
         response = await axios.post('http://localhost:13889/reviews/create', {
-            order_id: this.order.order_id,  // Use the correct order_id
+            order_id: order_new.order_id,
             lot_id: 'LOT001',
             grade: 'A',
             username: 'jonnybaboo',
-            star: 5,
+            star: '5',
             comment: 'Great product!',
         });
     } catch (error) {
@@ -39,7 +39,7 @@ Then('customer should be able to submit a review', async function () {
     assert.strictEqual(response.status, 201);
     assert.strictEqual(response.data.comment, 'Great product!');
     
-    this.review = await Review.findOne({ where: { order_id: this.order.order_id } });
+    this.review = await Review.findOne({ where: { order_id: order_new.order_id } });
 
     if (this.review) {
         await Review.destroy({ where: { review_id: this.review.review_id } });
@@ -54,7 +54,7 @@ Given('a customer already commented on the product', async function () {
         lot_id: 'LOT001',
         grade: 'A',
         username: 'jonnybaboo',
-        star: 4,
+        star: '4',
         comment: 'This is the updated test.',
     });
 });
@@ -63,7 +63,7 @@ When('customer tries to edit the review', async function () {
     try {
         response = await axios.put(`http://localhost:13889/reviews/edit/${this.review.review_id}`, {
             username: 'jonnybaboo',
-            star: 1,
+            star: '1',
             comment: 'Updated Comment test +1',
         });
     } catch (error) {
@@ -97,7 +97,7 @@ When('customer comments something', async function () {
             lot_id: this.product.lot_id,
             grade: this.product.grade,
             username: 'jonnybaboo',
-            star: 3,
+            star: '3',
             comment: 'First review!',
         });
     } catch (error) {
