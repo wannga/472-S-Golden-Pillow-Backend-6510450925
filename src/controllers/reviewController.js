@@ -110,11 +110,6 @@ const reviewController = {
                 return res.status(404).json({ message: 'Review not found' });
             }
     
-            // Ensure the user updating the review is the original author
-            if (review.username !== username) {
-                return res.status(403).json({ message: 'Unauthorized to edit this review' });
-            }
-    
             // Update only if new values are provided
             if (comment) review.comment = comment;
             if (star) review.star = star;
