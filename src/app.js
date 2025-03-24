@@ -48,6 +48,9 @@ const orderController = require('./controllers/orderController');
 const productController = require('./controllers/productController');
 const userController = require('./controllers/userController');
 const cartController = require('./controllers/cartController'); 
+const couponController = require('./controllers/couponController');
+const deliveredOrderController = require('./controllers/deliveredOrderController');
+const reviewController = require('./controllers/reviewController')
 
 
 const Order = require('./models/Order');
@@ -117,7 +120,33 @@ app.post('/orders/updatePackedStatus', orderController.updatePackedStatus);
 app.post('/orders/createreceipt', orderController.createreceipt);
 app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
 app.get('/income-summary', productController.getIncomeSummary);
+app.get('/coupon', couponController.getAllCoupons);
+app.post('/coupon/createCoupon', couponController.addCoupon);
+app.get('/coupon/check-coupon/:coupon_code', couponController.checkCouponCode);
+app.get('/coupon/available-coupon', couponController.getAvailableCoupons);
+app.post('/coupon/check-coupon-condition', couponController.validateCouponUsage);
+app.get('/coupon/get-coupon-by-id/:coupon_id', couponController.getCouponById);
+app.put('/coupon/reActivateCoupon/:coupon_id', couponController.reActivateCoupon);
+app.put('/coupon/disableCoupon/:coupon_id', couponController.disableCoupon);
+app.delete('/coupon/delete-coupon/:coupon_code', couponController.deleteCouponByCode);
+app.get('/coupon/get-coupon-by-code/:coupon_code', couponController.getCouponByCode);
+app.post('/coupon/coupon-discount', couponController.calculateDiscountedPrice);
+app.post('/delivered-orders',deliveredOrderController.addDelivery);
+app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
+app.get('/delivered-order/:deliver_id', deliveredOrderController.getDeliveredOrderDetails);
+app.post('/register-admin-staff', userController.addAdminAndStaff);
+app.delete('/delete-user/:staffId', userController.deleteUserById);
+app.get('/cart/:userId/item-count', cartController.getCartItemCount);
 
+app.post('/reviews/create', reviewController.createReview);
+app.put('/reviews/feedback/:review_id', reviewController.updateReviewFeedback);
+app.get('/reviews/:review_id', reviewController.getReviewsByID);
+app.get('/reviews', reviewController.getReviewsAll);
+app.put('/reviews/edit/:review_id', reviewController.updateReview);
+app.get('/reviews1/average-rating', reviewController.getAverageRating);
+
+
+app.delete('/delivered-order/:deliver_id', deliveredOrderController.deleteDeliveredOrderById);
 const server = http.createServer(app);
 
 app.use((err, req, res, next) => {

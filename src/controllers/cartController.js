@@ -202,3 +202,23 @@ exports.deleteProductsByCartId = async (req, res) => {
     }
   };
   
+// Get total number of items in the cart
+exports.getCartItemCount = async (req, res) => {
+  try {
+      const { userId } = req.params;
+
+      // Find the user's cart
+      const cart = await Cart.findOne({ where: { user_id: userId } });
+      if (!cart) {
+          return res.status(404).json({ error: 'Cart not found for the given user ID' });
+      }
+
+      // Sum the amount of all items in the cart
+      const totalAmount = await CartItem.sum('amount', { where: { cart_id: cart.cart_id } });
+
+      res.status(200).json({ totalAmount: totalAmount || 0 });
+  } catch (error) {
+      console.error('Error fetching cart item count:', error);
+      res.status(500).json({ error: 'Failed to fetch cart item count' });
+  }
+};

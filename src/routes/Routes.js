@@ -4,6 +4,7 @@ const router = express.Router();
 const userController = require('../src/controllers/userController');
 const productController = require('../controllers/productController');
 const cartController = require('../controllers/cartController');
+const couponController = require('../controllers/couponController');
 
 
 
@@ -14,6 +15,8 @@ router.post('/register', userController.validateUserRegistration, userController
 router.post('/login', userController.loginUser);
 router.get('/cart/:userId', cartController.getCartItems);
 router.delete('/cart/:productId', cartController.removeFromCart);
+
+router.get('./coupon', couponController.getAllCoupons);
 
 module.exports = router;
 
