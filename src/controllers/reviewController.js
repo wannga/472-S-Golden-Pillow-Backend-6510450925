@@ -20,12 +20,13 @@ const reviewController = {
             }
             // Check if user already reviewed
             const existingReview = await Review.findOne({
-                where: { username, order_id, lot_id, grade }
+                 where: { username, lot_id, grade }
             });
 
-            if (existingReview) {
-                return res.status(400).json({ message: "You have already reviewed this product." });
+            if (existingReview && existingReview.order_id === order_id) {
+                return res.status(400).json({ message: "You have already reviewed this product for this order." });
             }
+
 
             // สร้างรีวิวใหม่
             const newReview = await Review.create({
