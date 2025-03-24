@@ -60,7 +60,7 @@ After(async function () {
   
   await axios.post(`http://localhost:13889/orders/updatePackedStatus`, {
     orderId,
-    packed_status: "packed",
+    packed_status: "not packed yet",
   });
   
 });
