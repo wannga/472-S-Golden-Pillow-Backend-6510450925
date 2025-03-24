@@ -10,11 +10,10 @@ let review = null;
 // Scenario: Customer can review a delivered product
 Given('a customer has an order in which delivery_status of that order is "sent the packet"', async function () {
     this.order = await Order.create({
-        order_id: 999,
+        order_id: 1270,
         delivery_status: "sent the packet",
         user_id: 1,
         total_price: 12700,
-        delivery_status: "sent the packet",
         payment_status: "Approved",
         packed_status: "packed",
         order_date: new Date()
