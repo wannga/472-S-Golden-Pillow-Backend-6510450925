@@ -251,7 +251,8 @@ exports.deleteCouponByCode = async (req, res) => {
     const { coupon_code } = req.params;
   
     try {
-      const coupon = await Coupon.findByPk(coupon_code);
+    const coupon = await Coupon.findOne({ where: { coupon_code } });
+
       if (!coupon) {
         return res.status(404).json({ message: 'Coupon not found' });
       }

@@ -129,6 +129,7 @@ app.get('/coupon/get-coupon-by-id/:coupon_id', couponController.getCouponById);
 app.put('/coupon/reActivateCoupon/:coupon_id', couponController.reActivateCoupon);
 app.put('/coupon/disableCoupon/:coupon_id', couponController.disableCoupon);
 app.delete('/coupon/delete-coupon/:coupon_code', couponController.deleteCouponByCode);
+app.get('/coupon/get-coupon-by-code/:coupon_code', couponController.getCouponByCode);
 app.post('/coupon/coupon-discount', couponController.calculateDiscountedPrice);
 app.post('/delivered-orders',deliveredOrderController.addDelivery);
 app.get('/delivered-orders', deliveredOrderController.getAllDeliveredOrders);
