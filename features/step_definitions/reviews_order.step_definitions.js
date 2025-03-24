@@ -1,11 +1,20 @@
-const { Given, When, Then } = require('@cucumber/cucumber');
+const { Given, When, Then, After } = require('@cucumber/cucumber');
 const assert = require('assert');
 const axios = require('axios');
 const Review = require('../../src/models/Review');
 const Order = require('../../src/models/Order');
 
 let response = null;
-let review = null;
+
+After(async function () {
+    if (this.order) {
+        await Review.destroy({ where: { order_id: this.order.order_id } });
+        await Order.destroy({ where: { order_id: this.order.order_id } });
+    }
+    if (this.review) {
+        await Review.destroy({ where: { review_id: this.review.review_id } });
+    }
+});
 
 // Scenario: Customer can review a delivered product
 Given('a customer has an order in which delivery_status of that order is "sent the packet"', async function () {
@@ -36,9 +45,11 @@ When('customer wants to comment on a product in that order', async function () {
     }
 });
 
-Then('customer should be able to submit a review', function () {
+Then('customer should be able to submit a review', async function () {
     assert.strictEqual(response.status, 201);
     assert.strictEqual(response.data.comment, 'Great product!');
+    
+    this.review = await Review.findOne({ where: { order_id: this.order.order_id } });
 });
 
 // Scenario: Customer edits an existing review
@@ -100,4 +111,6 @@ When('customer comments something', async function () {
 Then('the product\'s first review should be the comment provided by the customer', async function () {
     assert.strictEqual(response.status, 201);
     assert.strictEqual(response.data.comment, 'First review!');
+    
+    this.review = await Review.findOne({ where: { order_id: 47 } });
 });
