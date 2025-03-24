@@ -32,6 +32,7 @@
     "@cucumber/cucumber": "^11.2.0",
     "chai": "^5.2.0",
     "nodemon": "^3.1.7",
-    "puppeteer": "^24.2.1"
+    "puppeteer": "^24.2.1",
+    "supertest": "^7.1.0"
   }
 }
