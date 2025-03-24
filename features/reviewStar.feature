@@ -1,7 +1,7 @@
 Feature: Product Review System
 
   Scenario: Calculate the average rating after a new review
-    Given a customer has an order in which delivery_status of that order is "Delivered"
+    Given a customer has an order in which delivery_status of that order is status "Delivered"
     And the product in that order already has reviews with 4, 3, and 5 stars
     When the customer rates the product with 5 stars
     Then the star average should be 4.25 stars

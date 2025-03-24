@@ -8,7 +8,7 @@ let existingReviews = [4, 3, 5];
 let order = { id: 1, delivery_status: "Delivered" };
 let userHasReviewed = false;
 
-Given('a customer has an order in which delivery_status of that order is {string}', function (status) {
+Given('a customer has an order in which delivery_status of that order is status {string}', function (status) {
     order.delivery_status = status;
 });
 

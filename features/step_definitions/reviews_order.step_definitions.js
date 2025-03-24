@@ -6,16 +6,6 @@ const Order = require('../../src/models/Order');
 
 let response = null;
 
-After(async function () {
-    if (this.order) {
-        await Review.destroy({ where: { order_id: this.order.order_id } });
-        await Order.destroy({ where: { order_id: this.order.order_id } });
-    }
-    if (this.review) {
-        await Review.destroy({ where: { review_id: this.review.review_id } });
-    }
-});
-
 // Scenario: Customer can review a delivered product
 Given('a customer has an order in which delivery_status of that order is "sent the packet"', async function () {
     this.order = await Order.create({
@@ -32,7 +22,7 @@ Given('a customer has an order in which delivery_status of that order is "sent t
 When('customer wants to comment on a product in that order', async function () {
     try {
         response = await axios.post('http://localhost:13889/reviews/create', {
-            order_id: this.order.order_id,
+            order_id: this.order.order_id,  // Use the correct order_id
             lot_id: 'LOT001',
             grade: 'A',
             username: 'jonnybaboo',
@@ -50,6 +40,10 @@ Then('customer should be able to submit a review', async function () {
     assert.strictEqual(response.data.comment, 'Great product!');
     
     this.review = await Review.findOne({ where: { order_id: this.order.order_id } });
+
+    if (this.review) {
+        await Review.destroy({ where: { review_id: this.review.review_id } });
+    }
 });
 
 // Scenario: Customer edits an existing review
@@ -82,6 +76,10 @@ Then('the comment is updated successfully', async function () {
     const updatedReview = await Review.findByPk(this.review.review_id);
     assert.strictEqual(response.status, 200);
     assert.strictEqual(updatedReview.comment, 'Updated Comment test +1');
+
+    if (this.review) {
+        await Review.destroy({ where: { review_id: this.review.review_id } });
+    }
 });
 
 // Scenario: Customer reviews a product that has no reviews
@@ -108,9 +106,18 @@ When('customer comments something', async function () {
     }
 });
 
-Then('the product\'s first review should be the comment provided by the customer', async function () {
+Then("the product's first review should be the comment provided by the customer", async function () {
     assert.strictEqual(response.status, 201);
     assert.strictEqual(response.data.comment, 'First review!');
     
     this.review = await Review.findOne({ where: { order_id: 47 } });
+
+    if (this.review){
+        await Review.destroy({ where: { review_id: this.review.review_id } });
+    }
+
+    const orderToDelete = await Order.findByPk(1270);
+    if (orderToDelete){
+        await Order.destroy({ where: { order_id: 1270 } });
+    }
 });
