@@ -165,12 +165,20 @@ When('I changed the status of coupon id {int} to “AVAILABLE”', async functio
     });
 });
 
-// Then steps
-Then('I should see a success message {string}', function (expectedMessage) {
+When('I delete coupon {string}', async function(coupon_code) {
+    const coupon = await axios.get(`http://localhost:13889/coupon`);
+    const deleteCoupon = await coupon.findOne({ where: { coupon_code } });
+    const response = await axios.delete(`http://localhost:13889/delete-coupon/${deleteCoupon.coupon_code}`);
+    assert.strictEqual(response.status, 200, 'coupon deleted successfully');
+  });
+
+When('I see a success message {string}', function (expectedMessage) {
     assert.ok(this.response, 'Response is undefined');
     assert.strictEqual(this.response.status, 201, 'Expected status 201 for successful coupon creation');
     assert.strictEqual(this.response.data.message, expectedMessage, `Expected message: "${expectedMessage}", but got "${this.response.data.message}"`);
 });
+
+// Then steps
 Then('the coupon should be successfully added to the system.', function () {
     assert.strictEqual(response.status, 201, 'Expected status 201 for successful coupon creation');
     assert.strictEqual(response.data.message, 'Coupon created successfully!', 'Unexpected success message');
@@ -222,3 +230,10 @@ Then('coupon id {int} status will be “AVAILABLE”', async function (coupon_id
     const response = await axios.get(`http://localhost:13889/coupon/get-coupon-by-id/${coupon_id}`);
     assert.strictEqual(response.data.coupon_status, 'AVAILABLE');
 });
+
+Then('coupon {string} should disappear from the user table in the database', async function (coupon_code) {
+    const response = await axios.get(`http://localhost:13889/coupon`);
+
+    const coupon = await response.data.findOne({ where: { coupon_code } });
+    assert.strictEqual(coupon, null, 'Coupon should not be found in the database');
+  });

@@ -9,7 +9,9 @@ Feature: Create Coupons
     And I enter "THIRD" in the coupon code field
     And I enter "Minimum purchase of 500 baht" in the coupon condition field
     And I click the confirm button in createCouponPage
-    Then I should see a success message "Coupon created successfully!"
+    And I see a success message "Coupon created successfully!"
+    When I delete coupon "THIRD"
+    Then coupon "THIRD" should disappear from the user table in the database
   
   Scenario: Save when coupon code already exists
     Given I am an admin

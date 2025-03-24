@@ -246,3 +246,20 @@ exports.validateCouponUsage = async (req, res) => {
         res.status(500).json({ message: "Failed to validate coupon" });
     }
 };
+
+exports.deleteCouponByCode = async (req, res) => {
+    const { coupon_code } = req.params;
+  
+    try {
+      const coupon = await Coupon.findByPk(coupon_code);
+      if (!coupon) {
+        return res.status(404).json({ message: 'Coupon not found' });
+      }
+  
+       await coupon.destroy();
+       return res.status(200).json({ message: 'Coupon deleted successfully' });
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  };
