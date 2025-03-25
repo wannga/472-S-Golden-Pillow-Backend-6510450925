@@ -50,7 +50,7 @@ services:
       - .env
 
 volumes:
-  mysql_data: # Define the volume used by the mysql service
+  mysql_data: 
   
 networks:
   app-network:
