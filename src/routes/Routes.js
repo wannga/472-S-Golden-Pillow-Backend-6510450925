@@ -19,3 +19,7 @@ router.delete('/cart/:productId', cartController.removeFromCart);
 router.get('./coupon', couponController.getAllCoupons);
 
 module.exports = router;
+
+
+
+

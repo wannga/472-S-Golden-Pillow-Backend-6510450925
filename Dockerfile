@@ -10,5 +10,4 @@ COPY . .
 
 EXPOSE 13889
 
-# Start the app with npm start
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
