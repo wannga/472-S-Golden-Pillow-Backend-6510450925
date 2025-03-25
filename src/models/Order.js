@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const User = require('./User');
 
-const Order = sequelize.define('Order', {
+const Order = sequelize.define('orders', {
   order_id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -10,10 +11,7 @@ const Order = sequelize.define('Order', {
   user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: 'Users', // Reference the Users table
-      key: 'user_id',
-    },
+
   },
   total_price: {
     type: DataTypes.FLOAT(10, 2),
@@ -49,5 +47,6 @@ const Order = sequelize.define('Order', {
 });
 
 
+Order.belongsTo(User, { foreignKey: 'user_id' });
 
 module.exports = Order;

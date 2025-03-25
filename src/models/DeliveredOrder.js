@@ -1,8 +1,9 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-
+const User = require('./User');
+const Order = require('./Order');
 const DeliveredOrder = sequelize.define(
-  "DeliveredOrder",
+  "deliveredorders",
   {
     deliver_id: {
       type: DataTypes.INTEGER,
@@ -16,26 +17,21 @@ const DeliveredOrder = sequelize.define(
     staff_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: "Users", // Reference the Users table
-        key: "user_id",
-      },
+      
     },
     order_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: "Orders", // Reference the Orders table
-        key: "order_id",
-      },
+      
     },
   },
   {
-    tableName: "DeliveredOrders",
+    tableName: "deliveredorders",
     timestamps: false, // Disable timestamps if not needed
   }
 );
-
+DeliveredOrder.belongsTo(Order, { foreignKey: 'order_id'});
+DeliveredOrder.belongsTo(User, { foreignKey: 'staff_id', targetKey: 'user_id' });
 module.exports = DeliveredOrder;
 
 

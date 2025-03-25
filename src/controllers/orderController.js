@@ -5,8 +5,8 @@ const CartItem = require('../models/CartItem');
 const Product = require('../models/Product');
 const sequelize = require('../config/database');
 const User = require('../models/User');
-const Receipt = require('../models/receipt');
-const { createCanvas, loadImage } = require('canvas');
+// const Receipt = require('../models/Receipt');
+// const { createCanvas, loadImage } = require('canvas');
 const path = require('path');
 const fs = require('fs');
 
@@ -17,16 +17,12 @@ exports.placeOrder = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Fetch the user's cart and its items
+    // 🛒 ดึง cart พร้อม CartItem (ไม่ต้อง include Product แล้ว)
     const cart = await Cart.findOne({
       where: { user_id: userId },
       include: {
         model: CartItem,
         as: 'items',
-        include: {
-          model: Product,
-          as: 'product',
-        },
       },
     });
 
@@ -34,15 +30,24 @@ exports.placeOrder = async (req, res) => {
       return res.status(404).json({ error: 'Cart is empty or not found' });
     }
 
-    // Calculate the total price of the items in the cart
+    // 🟡 โหลด product ทั้งหมดขึ้นมา
+    const allProducts = await Product.findAll();
+
+    // 💸 คำนวณราคารวมด้วยการแมตช์สินค้าเอง
     let totalPrice = 0;
     for (const item of cart.items) {
-      if (item.product) {
-        totalPrice += item.amount * item.product.sale_price;
+      const product = allProducts.find(
+        (p) => p.lot_id === item.lot_id && p.grade === item.grade
+      );
+
+      if (product) {
+        totalPrice += item.amount * product.sale_price;
+      } else {
+        console.warn(`Product not found for lot_id: ${item.lot_id}, grade: ${item.grade}`);
       }
     }
 
-    // Create a new order
+    // 🧾 สร้าง order ใหม่
     const newOrder = await Order.create({
       user_id: userId,
       total_price: totalPrice,
@@ -60,7 +65,7 @@ exports.placeOrder = async (req, res) => {
 
     console.log('New order created:', newOrder);
 
-    // Create order lines for each item in the cart
+    // 📦 สร้าง order lines สำหรับแต่ละ item
     for (const item of cart.items) {
       await OrderLine.create({
         order_id: newOrder.order_id,
@@ -70,10 +75,10 @@ exports.placeOrder = async (req, res) => {
       });
     }
 
-    // Clear the cart after placing the order
-    //await CartItem.destroy({ where: { cart_id: cart.cart_id } });
+    // ❗ ถ้าต้องการล้าง cart หลังสั่งซื้อ
+    // await CartItem.destroy({ where: { cart_id: cart.cart_id } });
 
-    // Redirect to the payment page (handled in the frontend)
+    // ✅ ส่งกลับไปที่หน้า payment
     res.status(201).json({
       message: 'Order created successfully',
       orderId: newOrder.order_id,
@@ -187,6 +192,8 @@ exports.getOrderDetails = async (req, res) => {
       orderId: order.order_id,
       orderDate: order.order_date.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
       userName: userName,
+      payment_status: order.payment_status,
+      delivery_status: order.delivery_status,
       orderLines: orderLines.map((line) => ({
         lotId: line.lot_id,
         grade: line.grade,
@@ -325,43 +332,57 @@ exports.updatePaymentStatus = async (req, res) => {
       // Update each product's LotamountStock and status based on order lines
       for (const line of order.orderLines) {
         const product = line.product;
-        const newLotamountStock = product.LotamountStock - line.amount;
-
-        let updatedStatus = 'Available'; // Default status
-        if (newLotamountStock <= 0) {
-          updatedStatus = 'Out of Stock'; // Set status to Out of Stock if stock is depleted
+    
+        if (!product) {
+          console.warn(`⚠️ Product not found for order line: lot_id=${line.lot_id}, grade=${line.grade}`);
+          continue;
         }
-
-        // Update the product's LotamountStock and status
+    
+        const newLotamountStock = product.LotamountStock - line.amount;
+        let updatedStatus = newLotamountStock <= 0 ? 'Out of Stock' : 'Available';
+    
         await Product.update(
-          { 
-            LotamountStock: Math.max(newLotamountStock, 0), // Prevent negative stock
+          {
+            LotamountStock: Math.max(newLotamountStock, 0),
             status: updatedStatus,
           },
-          { where: { lot_id: product.lot_id } }
+          {
+            where: {
+              lot_id: product.lot_id,
+              grade: product.grade, // เพิ่ม grade ถ้าคุณใช้ composite key
+            }
+          }
         );
       }
     } else if (payment_status === 'Rejected') {
       // Revert stock for each product in the order lines
       for (const line of order.orderLines) {
         const product = line.product;
-        const newRemainLotamount = product.RemainLotamount + line.amount;
-
-        let updatedStatus = 'Available'; // Default status
-        if (newRemainLotamount <= 0) {
-          updatedStatus = 'Out of Stock'; // Set status to Out of Stock if stock is depleted
+    
+        if (!product) {
+          console.warn(`⚠️ Product not found for order line: lot_id=${line.lot_id}, grade=${line.grade}`);
+          continue;
         }
-
-        // Update the product's RemainLotamount and status
+    
+        const newRemainLotamount = product.RemainLotamount + line.amount;
+    
+        let updatedStatus = newRemainLotamount <= 0 ? 'Out of Stock' : 'Available';
+    
         await Product.update(
-          { 
-            RemainLotamount: Math.max(newRemainLotamount, 0), // Prevent negative stock
+          {
+            RemainLotamount: Math.max(newRemainLotamount, 0),
             status: updatedStatus,
           },
-          { where: { lot_id: product.lot_id } }
+          {
+            where: {
+              lot_id: product.lot_id,
+              grade: product.grade,
+            }
+          }
         );
       }
     }
+    
 
     console.log(`Updating order ID ${orderId} to status: ${payment_status}`);
     order.payment_status = payment_status;
@@ -430,107 +451,107 @@ exports.updatePackedStatus = async (req, res) => {
   }
 };
 
-exports.createreceipt = async (req, res) => {
-  const { orderId, userId } = req.body;
+// exports.createreceipt = async (req, res) => {
+//   const { orderId, userId } = req.body;
 
-  if (!userId || !orderId) {
-    return res.status(400).send({ error: 'userId and orderId are required' });
-  }
+//   if (!userId || !orderId) {
+//     return res.status(400).send({ error: 'userId and orderId are required' });
+//   }
 
-  try {
-    // Fetch order details to get total price
-    const order = await Order.findOne({ where: { order_id: orderId } });
-    if (!order) {
-      return res.status(404).send({ error: 'Order not found.' });
-    }
+//   try {
+//     // Fetch order details to get total price
+//     const order = await Order.findOne({ where: { order_id: orderId } });
+//     if (!order) {
+//       return res.status(404).send({ error: 'Order not found.' });
+//     }
 
-    // Fetch order lines for the given orderId
-    const orderLines = await OrderLine.findAll({ where: { order_id: orderId } });
-    if (!orderLines.length) {
-      return res.status(404).send({ error: 'No order lines found for this order.' });
-    }
+//     // Fetch order lines for the given orderId
+//     const orderLines = await OrderLine.findAll({ where: { order_id: orderId } });
+//     if (!orderLines.length) {
+//       return res.status(404).send({ error: 'No order lines found for this order.' });
+//     }
 
-    // Collect product details
-    let productsInfo = [];
-    for (let orderLine of orderLines) {
-      const product = await Product.findOne({
-        where: {
-          lot_id: orderLine.lot_id,
-          grade: orderLine.grade
-        }
-      });
+//     // Collect product details
+//     let productsInfo = [];
+//     for (let orderLine of orderLines) {
+//       const product = await Product.findOne({
+//         where: {
+//           lot_id: orderLine.lot_id,
+//           grade: orderLine.grade
+//         }
+//       });
 
-      if (!product) {
-        return res.status(404).send({ error: `Product not found for lot ${orderLine.lot_id} and grade ${orderLine.grade}` });
-      }
+//       if (!product) {
+//         return res.status(404).send({ error: `Product not found for lot ${orderLine.lot_id} and grade ${orderLine.grade}` });
+//       }
 
-      productsInfo.push({
-        lot_id: orderLine.lot_id,
-        grade: orderLine.grade,
-        sale_price: product.sale_price,
-        amount: orderLine.amount
-      });
-    }
+//       productsInfo.push({
+//         lot_id: orderLine.lot_id,
+//         grade: orderLine.grade,
+//         sale_price: product.sale_price,
+//         amount: orderLine.amount
+//       });
+//     }
 
-    // Create a receipt image
-    const canvas = createCanvas(600, 400 + productsInfo.length * 30);
-    const ctx = canvas.getContext('2d');
+//     // Create a receipt image
+//     const canvas = createCanvas(600, 400 + productsInfo.length * 30);
+//     const ctx = canvas.getContext('2d');
 
-    // Draw receipt background
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+//     // Draw receipt background
+//     ctx.fillStyle = '#ffffff';
+//     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#000000';
-    ctx.font = '20px Arial';
-    ctx.fillText('Receipt', 250, 50);
+//     ctx.fillStyle = '#000000';
+//     ctx.font = '20px Arial';
+//     ctx.fillText('Receipt', 250, 50);
 
-    ctx.font = '16px Arial';
-    ctx.fillText(`Order ID: ${orderId}`, 50, 100);
+//     ctx.font = '16px Arial';
+//     ctx.fillText(`Order ID: ${orderId}`, 50, 100);
 
-    let y = 150;
-    productsInfo.forEach((product, index) => {
-      ctx.fillText(
-        `Product Lot: ${product.lot_id}, Grade: ${product.grade}, Price: ${product.sale_price} Baht, Amount: ${product.amount}`,
-        50,
-        y
-      );
-      y += 30;
-    });
+//     let y = 150;
+//     productsInfo.forEach((product, index) => {
+//       ctx.fillText(
+//         `Product Lot: ${product.lot_id}, Grade: ${product.grade}, Price: ${product.sale_price} Baht, Amount: ${product.amount}`,
+//         50,
+//         y
+//       );
+//       y += 30;
+//     });
 
-    // Draw the total price from the order
-    ctx.font = '18px Arial';
-    ctx.fillText(`Total Price: ${order.total_price} Baht`, 50, y + 30);
+//     // Draw the total price from the order
+//     ctx.font = '18px Arial';
+//     ctx.fillText(`Total Price: ${order.total_price} Baht`, 50, y + 30);
 
-    // Create 'public/images' directory if it doesn't exist
-    const imageDir = path.join(__dirname, '..', 'public', 'images');
-    if (!fs.existsSync(imageDir)) {
-      fs.mkdirSync(imageDir, { recursive: true });
-    }
+//     // Create 'public/images' directory if it doesn't exist
+//     const imageDir = path.join(__dirname, '..', 'public', 'images');
+//     if (!fs.existsSync(imageDir)) {
+//       fs.mkdirSync(imageDir, { recursive: true });
+//     }
 
-    // Save the canvas as an image
-    let imagePath = path.join(imageDir, `receipt_${orderId}.png`);
-    imagePath = path.resolve(imagePath);
-    if (!imagePath.startsWith(imageDir)) {
-      throw new Error('Invalid path');
-    }
-    const out = fs.createWriteStream(imagePath);
-    const stream = canvas.createPNGStream();
-    stream.pipe(out);
+//     // Save the canvas as an image
+//     let imagePath = path.join(imageDir, `receipt_${orderId}.png`);
+//     imagePath = path.resolve(imagePath);
+//     if (!imagePath.startsWith(imageDir)) {
+//       throw new Error('Invalid path');
+//     }
+//     const out = fs.createWriteStream(imagePath);
+//     const stream = canvas.createPNGStream();
+//     stream.pipe(out);
 
-    out.on('finish', async () => {
-      // Insert into receipt table
-      await Receipt.create({
-        order_id: orderId,
-        user_id: userId,
-        receipt_date: new Date(),
-        Receipt_path: `/images/receipt_${orderId}.png`
-      });
+//     out.on('finish', async () => {
+//       // Insert into receipt table
+//       await Receipt.create({
+//         order_id: orderId,
+//         user_id: userId,
+//         receipt_date: new Date(),
+//         Receipt_path: `/images/receipt_${orderId}.png`
+//       });
 
-      res.status(200).send({ message: 'Receipt created successfully', path: imagePath });
-    });
+//       res.status(200).send({ message: 'Receipt created successfully', path: imagePath });
+//     });
 
-  } catch (error) {
-    console.error('Error creating receipt:', error);
-    res.status(500).send({ error: 'Failed to create receipt' });
-  }
-};
+//   } catch (error) {
+//     console.error('Error creating receipt:', error);
+//     res.status(500).send({ error: 'Failed to create receipt' });
+//   }
+// };

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Coupon = sequelize.define('Coupon', {
+const Coupon = sequelize.define('coupon', {
     coupon_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -25,7 +25,7 @@ const Coupon = sequelize.define('Coupon', {
         allowNull: false,
     }  },
 {
-tableName: 'Coupon',
+tableName: 'coupon',
   timestamps: false,
 });
 

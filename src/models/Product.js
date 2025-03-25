@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database'); // Update with the correct path to your database configuration
 
-const Product = sequelize.define('Product', {
+const Product = sequelize.define('products', {
   lot_id: {
     type: DataTypes.CHAR(10),
     allowNull: false,
@@ -47,7 +47,7 @@ const Product = sequelize.define('Product', {
     allowNull: false
   }
 }, {
-  tableName: 'Products',
+  tableName: 'products',
   timestamps: false, // Disable timestamps if not needed
 });
 

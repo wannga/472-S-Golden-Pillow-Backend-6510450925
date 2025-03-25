@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const User = require('./User');
 const Cart = sequelize.define(
-  'Cart',
+  'cart',
   {
     cart_id: {
       type: DataTypes.INTEGER,
@@ -12,18 +12,13 @@ const Cart = sequelize.define(
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Users', 
-        key: 'user_id',
-      }
     },
   },
   {
-    tableName: 'Cart',
+    tableName: 'cart',
     timestamps: false,
   }
 );
 
-Cart.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-
+Cart.belongsTo(User, { foreignKey: 'user_id' });
 module.exports = Cart;

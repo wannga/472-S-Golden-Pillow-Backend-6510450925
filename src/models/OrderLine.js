@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
-const OrderLine = sequelize.define('OrderLine', {
+const Product = require('./Product');
+const Order = require('./Order');
+const OrderLine = sequelize.define('orderline', {
   order_line_id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -10,26 +11,17 @@ const OrderLine = sequelize.define('OrderLine', {
   order_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: 'orders', // Reference to the orders table
-      key: 'order_id',
-    },
+    
   },
   lot_id: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'products', // Reference to the products table
-      key: 'lot_id',
-    },
+    
   },
   grade: {
     type: DataTypes.STRING,
     allowNull: false,
-    references: {
-      model: 'products', 
-      key: 'grade',
-    },
+    
   },
   amount: {
     type: DataTypes.INTEGER,
@@ -42,5 +34,8 @@ const OrderLine = sequelize.define('OrderLine', {
   tableName: 'orderline', 
   timestamps: false,
 });
+OrderLine.belongsTo(Order, { foreignKey: 'order_id'});
+OrderLine.belongsTo(Product, { foreignKey: 'lot_id' });
+OrderLine.belongsTo(Product, { foreignKey: 'grade' });
 
 module.exports = OrderLine;
