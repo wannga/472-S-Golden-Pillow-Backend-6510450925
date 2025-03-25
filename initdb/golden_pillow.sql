@@ -278,7 +278,7 @@ CREATE TABLE `reviews` (
 
 INSERT INTO `reviews` (`review_id`, `username`, `star`, `comment`, `like_count`, `dislike_count`, `order_id`, `lot_id`, `grade`) VALUES
 (3, 'jojo', '3', 'ส่งช้าไปหน่อย แต่สินค้าโอเค', 3, 3, 48, 'LOT004', 'C'),
-(7, 'jojo', '5', 'ส่งไวของดี', 12, 0, 48, 'LOT008', 'A');
+(7, 'jojo', '5', 'ส่งไวของดี', 12, 0, 48, 'LOT008', 'A'),
 (38, 'testcustomer', '3', 'Average product.', 3, 3, 49, 'LOT001', 'A');
 
 -- --------------------------------------------------------

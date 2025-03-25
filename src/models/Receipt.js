@@ -20,3 +20,4 @@ const Receipt = sequelize.define('receipt', {
 
 module.exports = Receipt;
 
+
