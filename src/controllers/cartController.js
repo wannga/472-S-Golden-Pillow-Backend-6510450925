@@ -3,37 +3,51 @@ const CartItem = require('../models/CartItem');
 const Product = require('../models/Product');
 const User = require('../models/User');
 
-// Get user's cart
+// Get user's cart (with products manually enriched)
 exports.getCart = async (req, res) => {
-    try {
-        const { userId } = req.params;
-        console.log('Fetching cart for userId:', userId); // Debugging statement
+  try {
+    const { userId } = req.params;
+    console.log('Fetching cart for userId:', userId);
 
-        const cart = await Cart.findOne({
-            where: { user_id: userId },
-            include: {
-                model: CartItem,
-                as: 'items',
-                include: {
-                    model: Product,
-                    as: 'product',
-                },
-            },
-        });
+    const cart = await Cart.findOne({
+      where: { user_id: userId },
+      include: {
+        model: CartItem,
+        as: 'items',
+      },
+    });
 
-        console.log('Fetched cart:', cart); // Debugging statement
-
-        if (!cart) {
-            console.log('Cart not found for user:', userId); // Debugging statement
-            return res.status(404).json({ error: 'Cart not found for the given user ID' });
-        }
-
-        res.status(200).json(cart);
-    } catch (error) {
-        console.error('Error fetching cart:', error);
-        res.status(500).json({ error: 'Failed to fetch cart' });
+    if (!cart) {
+      console.log('Cart not found for user:', userId);
+      return res.status(404).json({ error: 'Cart not found for the given user ID' });
     }
+
+    // 🔥 Load all products
+    const allProducts = await Product.findAll();
+
+    // 🔁 Enrich each cart item manually
+    const enrichedItems = cart.items.map(item => {
+      const product = allProducts.find(
+        p => p.lot_id === item.lot_id && p.grade === item.grade
+      );
+      return {
+        ...item.toJSON(),
+        product: product || null,
+      };
+    });
+
+    // ✅ Send enriched cart to frontend
+    res.status(200).json({
+      cart_id: cart.cart_id,
+      user_id: cart.user_id,
+      items: enrichedItems,
+    });
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    res.status(500).json({ error: 'Failed to fetch cart' });
+  }
 };
+
 
 // Add item to user's cart
 exports.addItemToCart = async (req, res) => {
@@ -159,48 +173,54 @@ exports.updateCartItemAmount = async (req, res) => {
 
 // Delete all items in product_in_cart where cart_id matches
 exports.deleteProductsByCartId = async (req, res) => {
-    try {
-      const { cartId } = req.params;
-      console.log(`Deleting products for cart ID: ${cartId}`); // Debugging
+  try {
+    const { cartId } = req.params;
+    console.log(`Deleting products for cart ID: ${cartId}`);
 
-      // Fetch all cart items for the given cart ID, including product data
-      const cartItems = await CartItem.findAll({
-        where: { cart_id: cartId },
-        include: [{ model: Product, as: 'product' }],
+    // ✅ 1. ดึงรายการสินค้าในตะกร้าพร้อมข้อมูลสินค้า
+    const cartItems = await CartItem.findAll({
+      where: { cart_id: cartId },
+      include: [{ model: Product, as: 'product' }]
     });
 
-      // Update each product's RemainLotamount and status
-      for (const item of cartItems) {
-        const product = item.product;
-        const newRemainLotamount = product.RemainLotamount - item.amount;
+    // ✅ 2. อัปเดต stock ของสินค้าแต่ละตัว
+    for (const item of cartItems) {
+      const product = item.product;
 
-        let updatedStatus = 'Available'; // Default status
+      if (!product) {
+        console.warn(`Product not found for cart item: lot_id=${item.lot_id}, grade=${item.grade}`);
+        continue;
+      }
 
-        if (newRemainLotamount <= 0) {
-            updatedStatus = 'Out of Stock'; // Set status to Out of Stock if stock is depleted
+      const newRemainLotamount = product.RemainLotamount - item.amount;
+      let updatedStatus = newRemainLotamount <= 0 ? 'Out of Stock' : 'Available';
+
+      await Product.update(
+        {
+          RemainLotamount: Math.max(newRemainLotamount, 0),
+          status: updatedStatus,
+        },
+        {
+          where: {
+            lot_id: product.lot_id,
+            grade: product.grade,
+          },
         }
-
-        // Update the product's RemainLotamount and status
-        await Product.update(
-            { 
-                RemainLotamount: Math.max(newRemainLotamount, 0), // Prevent negative stock
-                status: updatedStatus,
-            },
-            { where: { lot_id: product.lot_id } }
-        );
+      );
     }
 
-  
-      await CartItem.destroy({
-        where: { cart_id: cartId },
-      });
-  
-      res.status(200).json({ message: 'Products in cart cleared successfully.' });
-    } catch (error) {
-      console.error('Error deleting products from cart:', error);
-      res.status(500).json({ message: 'Failed to delete products from cart.' });
-    }
-  };
+    // ✅ 3. ลบรายการใน cart
+    await CartItem.destroy({
+      where: { cart_id: cartId },
+    });
+
+    res.status(200).json({ message: 'Products in cart cleared successfully.' });
+  } catch (error) {
+    console.error('Error deleting products from cart:', error);
+    res.status(500).json({ message: 'Failed to delete products from cart.' });
+  }
+};
+
   
 // Get total number of items in the cart
 exports.getCartItemCount = async (req, res) => {

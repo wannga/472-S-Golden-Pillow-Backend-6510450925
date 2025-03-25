@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const User = sequelize.define('User', {
+const User = sequelize.define('users', {
   user_id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -69,7 +69,7 @@ const User = sequelize.define('User', {
     }
   }
 }, {
-  tableName: 'Users',
+  tableName: 'users',
   timestamps: false, // Disable timestamps to prevent Sequelize from adding `createdAt` and `updatedAt`
 });
 

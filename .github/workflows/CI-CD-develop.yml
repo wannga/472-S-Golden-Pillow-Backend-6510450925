@@ -1,0 +1,51 @@
+name: CI - Develop Branch
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Create .env.ci from GitHub Secrets
+      run: |
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env.ci
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.ci
+
+
+    - name: Set up Docker Compose
+      run: |
+        docker compose -f docker-compose.yml --env-file .env.ci up -d
+        sleep 30
+
+    - name: Wait for MySQL to be ready
+      run: |
+        for i in {1..30}; do
+          docker exec mysql-database mysqladmin ping -h localhost --silent && break
+          echo "Waiting for MySQL..."
+          sleep 2
+        done
+
+    - name: Run backend tests
+      run: docker exec goldenpillow-backend npm test
+
+    - name: Tear down
+      run: docker compose -f docker-compose.yml --env-file .env.ci down
+
+    - name: Build Docker image
+      run: docker build -t goldenpillow-dev .

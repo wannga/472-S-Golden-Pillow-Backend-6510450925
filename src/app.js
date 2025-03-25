@@ -5,7 +5,6 @@ const http = require('http');
 const path = require('path');
 const cors = require('cors');
 const multer = require('multer');
-const RateLimit = require('express-rate-limit');
 
 // Load environment 
 dotenv.config();
@@ -118,12 +117,8 @@ app.post('/orders/updatePaymentStatus', orderController.updatePaymentStatus);
 app.post('/orders/updatedeliveryStatus', orderController.updatedeliveryStatus);
 app.post('/orders/updateStatusLedger', orderController.updateStatusLedger);
 app.post('/orders/updatePackedStatus', orderController.updatePackedStatus);
-const createReceiptLimiter = RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-});
-app.post('/orders/createreceipt', createReceiptLimiter, orderController.createreceipt);
-  app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
+// app.post('/orders/createreceipt', orderController.createreceipt);
+app.get('/sales-summary/:month', productController.getMonthlySalesSummary);
 app.get('/income-summary', productController.getIncomeSummary);
 app.get('/coupon', couponController.getAllCoupons);
 app.post('/coupon/createCoupon', couponController.addCoupon);
